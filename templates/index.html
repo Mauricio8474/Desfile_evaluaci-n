@@ -22,7 +22,7 @@
                     <i class="bi bi-people-fill display-4"></i>
                 </div>
                 <h5 class="card-title">Estudiantes</h5>
-                <p class="card-text text-muted">Ver listado completo de estudiantes agrupados por grupo.</p>
+                <p class="card-text text-muted">Ver listado completo de estudiantes.</p>
                 <a href="{{ url_for('listar_estudiantes') }}" class="btn btn-usm w-100">
                     <i class="bi bi-eye me-1"></i> Ver estudiantes
                 </a>
@@ -43,15 +43,11 @@
                         <i class="bi bi-pencil-square me-1"></i> Seleccionar estudiante
                     </button>
                     <ul class="dropdown-menu w-100 dropdown-menu-scroll" style="max-height: 300px; overflow-y: auto;">
-                        {% for item in grupos_con_estudiantes %}
-                        <li class="dropdown-header text-muted small">{{ item.grupo.nombre }}</li>
-                        {% for e in item.estudiantes %}
+                        {% for e in estudiantes %}
                         <li><a class="dropdown-item" href="{{ url_for('calificar_estudiante', estudiante_id=e.id) }}">
                             <i class="bi bi-person-fill me-1"></i> {{ e.nombre }}
                             <span class="badge bg-light text-dark ms-1">{{ e.codigo }}</span>
                         </a></li>
-                        {% endfor %}
-                        {% if not loop.last %}<li><hr class="dropdown-divider"></li>{% endif %}
                         {% endfor %}
                     </ul>
                 </div>
@@ -91,19 +87,15 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="stat-number text-usm">{{ grupos_con_estudiantes|length }}</div>
-                        <div class="text-muted">Grupos</div>
-                    </div>
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="stat-number text-usm">{{ total_estudiantes }}</div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="stat-number text-usm">{{ estudiantes|length }}</div>
                         <div class="text-muted">Estudiantes</div>
                     </div>
-                    <div class="col-md-3 text-center mb-3">
+                    <div class="col-md-4 text-center mb-3">
                         <div class="stat-number text-usm">{{ jurados|length }}</div>
                         <div class="text-muted">Jurados</div>
                     </div>
-                    <div class="col-md-3 text-center mb-3">
+                    <div class="col-md-4 text-center mb-3">
                         <div class="stat-number text-usm">11</div>
                         <div class="text-muted">Criterios de evaluaci&oacute;n</div>
                     </div>

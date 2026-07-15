@@ -3,7 +3,7 @@ import bcrypt
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, Admin, Grupo, Estudiante, Jurado, Criterio, Calificacion
+from models import db, Admin, Estudiante, Jurado, Criterio, Calificacion
 from config import Config
 from datetime import datetime, timezone
 from io import BytesIO
@@ -109,23 +109,13 @@ def calcular_promedio_jurados(estudiante_id):
         'promedio_final': prom_final
     }
 
-def get_grupos_con_estudiantes():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
-    result = []
-    for g in grupos:
-        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
-        result.append({'grupo': g, 'estudiantes': estudiantes})
-    return result
-
 # ─── Rutas p├║blicas ───
 
 @app.route('/')
 def index():
-    grupos_con_estudiantes = get_grupos_con_estudiantes()
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
     jurados = Jurado.query.order_by(Jurado.nombre).all()
-    total_estudiantes = sum(len(item['estudiantes']) for item in grupos_con_estudiantes)
-    return render_template('index.html', grupos_con_estudiantes=grupos_con_estudiantes,
-                           jurados=jurados, total_estudiantes=total_estudiantes)
+    return render_template('index.html', estudiantes=estudiantes, jurados=jurados)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -170,9 +160,8 @@ def logout():
 
 @app.route('/estudiantes')
 def listar_estudiantes():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
-    grupos_con_estudiantes = get_grupos_con_estudiantes()
-    return render_template('estudiantes.html', grupos_con_estudiantes=grupos_con_estudiantes)
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
+    return render_template('estudiantes.html', estudiantes=estudiantes)
 
 @app.route('/calificar/<int:estudiante_id>', methods=['GET', 'POST'])
 @login_required
@@ -234,18 +223,13 @@ def calificar_estudiante(estudiante_id):
 
 @app.route('/reporte')
 def reporte():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
     jurados = Jurado.query.order_by(Jurado.nombre).all()
     datos = []
-    for g in grupos:
-        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
-        grupo_datos = []
-        for e in estudiantes:
-            resultado = calcular_promedio_jurados(e.id)
-            if resultado:
-                grupo_datos.append({'estudiante': e, 'resultado': resultado})
-        if grupo_datos:
-            datos.append({'grupo': g, 'estudiantes': grupo_datos})
+    for e in estudiantes:
+        resultado = calcular_promedio_jurados(e.id)
+        if resultado:
+            datos.append({'estudiante': e, 'resultado': resultado})
     return render_template('reporte.html', datos=datos, jurados=jurados)
 
 @app.route('/exportar_excel')
@@ -260,7 +244,7 @@ def exportar_excel():
     )
     ws1 = wb.active
     ws1.title = 'Notas finales'
-    headers1 = ['Estudiante', 'C\u00f3digo', 'Grupo', 'Nota Portafolio', 'Nota Sustentaci\u00f3n', 'Nota Runway', 'Nota Final']
+    headers1 = ['Estudiante', 'C\u00f3digo', 'Nota Portafolio', 'Nota Sustentaci\u00f3n', 'Nota Runway', 'Nota Final']
     for col, h in enumerate(headers1, 1):
         cell = ws1.cell(row=1, column=col, value=h)
         cell.font = header_font
@@ -273,17 +257,16 @@ def exportar_excel():
         resultado = calcular_promedio_jurados(e.id)
         ws1.cell(row=row, column=1, value=e.nombre).border = thin_border
         ws1.cell(row=row, column=2, value=e.codigo).border = thin_border
-        ws1.cell(row=row, column=3, value=e.grupo_obj.nombre if e.grupo_obj else '').border = thin_border
         if resultado:
-            ws1.cell(row=row, column=4, value=resultado['promedio_portafolio']).border = thin_border
-            ws1.cell(row=row, column=5, value=resultado['promedio_sustentacion']).border = thin_border
-            ws1.cell(row=row, column=6, value=resultado['promedio_runway']).border = thin_border
-            ws1.cell(row=row, column=7, value=resultado['promedio_final']).border = thin_border
+            ws1.cell(row=row, column=3, value=resultado['promedio_portafolio']).border = thin_border
+            ws1.cell(row=row, column=4, value=resultado['promedio_sustentacion']).border = thin_border
+            ws1.cell(row=row, column=5, value=resultado['promedio_runway']).border = thin_border
+            ws1.cell(row=row, column=6, value=resultado['promedio_final']).border = thin_border
         else:
-            for col in range(4, 8):
+            for col in range(3, 7):
                 ws1.cell(row=row, column=col, value='Sin notas').border = thin_border
         row += 1
-    for col in range(1, 8):
+    for col in range(1, 7):
         ws1.column_dimensions[chr(64 + col)].width = 22
     ws2 = wb.create_sheet('Detalle por jurado')
     headers2 = ['Estudiante', 'Jurado', 'Criterio', 'Componente', 'Nota']
@@ -312,7 +295,7 @@ def exportar_excel():
 @app.route('/api/estudiantes')
 def api_estudiantes():
     estudiantes = Estudiante.query.order_by(Estudiante.id).all()
-    return jsonify([{'id': e.id, 'nombre': e.nombre, 'codigo': e.codigo, 'grupo': e.grupo} for e in estudiantes])
+    return jsonify([{'id': e.id, 'nombre': e.nombre, 'codigo': e.codigo} for e in estudiantes])
 
 @app.route('/api/calificacion/<int:estudiante_id>/<int:jurado_id>')
 def api_calificacion(estudiante_id, jurado_id):
@@ -327,80 +310,9 @@ def api_calificacion(estudiante_id, jurado_id):
 def admin_index():
     total_estudiantes = Estudiante.query.count()
     total_jurados = Jurado.query.count()
-    total_grupos = Grupo.query.count()
     total_calificaciones = Calificacion.query.count()
     return render_template('admin/index.html', total_estudiantes=total_estudiantes,
-                           total_jurados=total_jurados, total_grupos=total_grupos,
-                           total_calificaciones=total_calificaciones)
-
-# ─── CRUD Grupos ───
-
-@app.route('/admin/grupos')
-@login_required
-@admin_required
-def admin_grupos():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
-    return render_template('admin/grupos.html', grupos=grupos)
-
-@app.route('/admin/grupos/nuevo', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def admin_grupo_nuevo():
-    if request.method == 'POST':
-        nombre = request.form.get('nombre', '').strip()
-        descripcion = request.form.get('descripcion', '').strip()
-        horario = request.form.get('horario', '').strip()
-        if not nombre:
-            flash('El nombre del grupo es obligatorio', 'error')
-        elif Grupo.query.filter_by(nombre=nombre).first():
-            flash('Ya existe un grupo con ese nombre', 'error')
-        else:
-            grupo = Grupo(nombre=nombre, descripcion=descripcion, horario=horario if horario else None)
-            db.session.add(grupo)
-            db.session.commit()
-            flash(f'Grupo "{nombre}" creado correctamente', 'success')
-            return redirect(url_for('admin_grupos'))
-    return render_template('admin/grupo_form.html')
-
-@app.route('/admin/grupos/<int:grupo_id>/editar', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def admin_grupo_editar(grupo_id):
-    grupo = db.session.get(Grupo, grupo_id)
-    if not grupo:
-        flash('Grupo no encontrado', 'error')
-        return redirect(url_for('admin_grupos'))
-    if request.method == 'POST':
-        nombre = request.form.get('nombre', '').strip()
-        descripcion = request.form.get('descripcion', '').strip()
-        horario = request.form.get('horario', '').strip()
-        if not nombre:
-            flash('El nombre del grupo es obligatorio', 'error')
-        else:
-            existente = Grupo.query.filter_by(nombre=nombre).first()
-            if existente and existente.id != grupo_id:
-                flash('Ya existe otro grupo con ese nombre', 'error')
-            else:
-                grupo.nombre = nombre
-                grupo.descripcion = descripcion
-                grupo.horario = horario if horario else None
-                db.session.commit()
-                flash(f'Grupo "{nombre}" actualizado', 'success')
-                return redirect(url_for('admin_grupos'))
-    return render_template('admin/grupo_form.html', grupo=grupo)
-
-@app.route('/admin/grupos/<int:grupo_id>/eliminar', methods=['POST'])
-@login_required
-@admin_required
-def admin_grupo_eliminar(grupo_id):
-    grupo = db.session.get(Grupo, grupo_id)
-    if not grupo:
-        flash('Grupo no encontrado', 'error')
-    else:
-        db.session.delete(grupo)
-        db.session.commit()
-        flash(f'Grupo "{grupo.nombre}" eliminado', 'success')
-    return redirect(url_for('admin_grupos'))
+                           total_jurados=total_jurados, total_calificaciones=total_calificaciones)
 
 # ─── CRUD Estudiantes ───
 
@@ -408,12 +320,8 @@ def admin_grupo_eliminar(grupo_id):
 @login_required
 @admin_required
 def admin_estudiantes():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
-    estudiantes_por_grupo = {}
-    for g in grupos:
-        estudiantes_por_grupo[g] = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
-    sin_grupo = Estudiante.query.filter_by(grupo_id=None).order_by(Estudiante.id).all()
-    return render_template('admin/estudiantes.html', estudiantes_por_grupo=estudiantes_por_grupo, sin_grupo=sin_grupo)
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
+    return render_template('admin/estudiantes.html', estudiantes=estudiantes)
 
 @app.route('/admin/estudiantes/cargar', methods=['GET', 'POST'])
 @login_required
@@ -433,42 +341,23 @@ def admin_estudiantes_cargar():
                 return redirect(url_for('admin_estudiantes_cargar'))
             creados = 0
             actualizados = 0
-            grupos_creados = 0
             for row in filas:
-                if len(row) < 3:
+                if len(row) < 2:
                     continue
                 codigo = str(row[0]).strip() if row[0] is not None else ''
                 nombre = str(row[1]).strip() if row[1] is not None else ''
-                grupo_nombre = str(row[2]).strip() if row[2] is not None else ''
                 if not codigo or not nombre:
                     continue
-                grupo_obj = None
-                if grupo_nombre:
-                    grupo_obj = Grupo.query.filter_by(nombre=grupo_nombre).first()
-                    if not grupo_obj:
-                        grupo_obj = Grupo(nombre=grupo_nombre, descripcion=f'Importado de Excel')
-                        db.session.add(grupo_obj)
-                        db.session.flush()
-                        grupos_creados += 1
                 estudiante = Estudiante.query.filter_by(codigo=codigo).first()
                 if estudiante:
                     estudiante.nombre = nombre
-                    estudiante.grupo_id = grupo_obj.id if grupo_obj else None
-                    estudiante.grupo = grupo_obj.nombre if grupo_obj else None
                     actualizados += 1
                 else:
-                    estudiante = Estudiante(
-                        nombre=nombre, codigo=codigo,
-                        grupo_id=grupo_obj.id if grupo_obj else None,
-                        grupo=grupo_obj.nombre if grupo_obj else None
-                    )
+                    estudiante = Estudiante(nombre=nombre, codigo=codigo)
                     db.session.add(estudiante)
                     creados += 1
             db.session.commit()
-            msg = f'Importación completada: {creados} creados, {actualizados} actualizados'
-            if grupos_creados:
-                msg += f', {grupos_creados} grupos nuevos'
-            flash(msg, 'success')
+            flash(f'Importaci\u00f3n completada: {creados} creados, {actualizados} actualizados', 'success')
             return redirect(url_for('admin_estudiantes'))
         except Exception as e:
             db.session.rollback()
@@ -480,24 +369,20 @@ def admin_estudiantes_cargar():
 @login_required
 @admin_required
 def admin_estudiante_nuevo():
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         codigo = request.form.get('codigo', '').strip()
-        grupo_id = request.form.get('grupo_id')
-        grupo_id = int(grupo_id) if grupo_id and grupo_id.isdigit() else None
         if not nombre or not codigo:
-            flash('Nombre y c├│digo son obligatorios', 'error')
+            flash('Nombre y c\u00f3digo son obligatorios', 'error')
         elif Estudiante.query.filter_by(codigo=codigo).first():
-            flash('Ya existe un estudiante con ese c├│digo', 'error')
+            flash('Ya existe un estudiante con ese c\u00f3digo', 'error')
         else:
-            grupo_obj = db.session.get(Grupo, grupo_id) if grupo_id else None
-            estudiante = Estudiante(nombre=nombre, codigo=codigo, grupo_id=grupo_id, grupo=grupo_obj.nombre if grupo_obj else None)
+            estudiante = Estudiante(nombre=nombre, codigo=codigo)
             db.session.add(estudiante)
             db.session.commit()
             flash(f'Estudiante "{nombre}" creado correctamente', 'success')
             return redirect(url_for('admin_estudiantes'))
-    return render_template('admin/estudiante_form.html', grupos=grupos)
+    return render_template('admin/estudiante_form.html')
 
 @app.route('/admin/estudiantes/<int:estudiante_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -507,28 +392,22 @@ def admin_estudiante_editar(estudiante_id):
     if not estudiante:
         flash('Estudiante no encontrado', 'error')
         return redirect(url_for('admin_estudiantes'))
-    grupos = Grupo.query.order_by(Grupo.nombre).all()
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         codigo = request.form.get('codigo', '').strip()
-        grupo_id = request.form.get('grupo_id')
-        grupo_id = int(grupo_id) if grupo_id and grupo_id.isdigit() else None
         if not nombre or not codigo:
-            flash('Nombre y c├│digo son obligatorios', 'error')
+            flash('Nombre y c\u00f3digo son obligatorios', 'error')
         else:
             existente = Estudiante.query.filter_by(codigo=codigo).first()
             if existente and existente.id != estudiante_id:
-                flash('Ya existe otro estudiante con ese c├│digo', 'error')
+                flash('Ya existe otro estudiante con ese c\u00f3digo', 'error')
             else:
-                grupo_obj = db.session.get(Grupo, grupo_id) if grupo_id else None
                 estudiante.nombre = nombre
                 estudiante.codigo = codigo
-                estudiante.grupo_id = grupo_id
-                estudiante.grupo = grupo_obj.nombre if grupo_obj else None
                 db.session.commit()
                 flash(f'Estudiante "{nombre}" actualizado', 'success')
                 return redirect(url_for('admin_estudiantes'))
-    return render_template('admin/estudiante_form.html', estudiante=estudiante, grupos=grupos)
+    return render_template('admin/estudiante_form.html', estudiante=estudiante)
 
 @app.route('/admin/estudiantes/<int:estudiante_id>/eliminar', methods=['POST'])
 @login_required

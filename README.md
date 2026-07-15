@@ -25,20 +25,18 @@ Abrir en el navegador: `http://127.0.0.1:5000`
 desfile_evaluacion/
 ├── app.py                  # Aplicaci&oacute;n Flask (rutas, l&oacute;gica)
 ├── config.py               # Configuraci&oacute;n (DB, secret key)
-├── models.py               # Modelos SQLAlchemy (Admin, Grupo, Estudiante, Jurado, Criterio, Calificacion)
+├── models.py               # Modelos SQLAlchemy (Admin, Estudiante, Jurado, Criterio, Calificacion)
 ├── seed_data.py            # Script de datos de prueba
 ├── requirements.txt        # Dependencias
 ├── templates/              # Plantillas HTML
 │   ├── base.html           # Layout principal
 │   ├── index.html          # P&aacute;gina de inicio
 │   ├── login.html          # Login (jurado y administrador)
-│   ├── estudiantes.html    # Listado de estudiantes por grupo
+│   ├── estudiantes.html    # Listado de estudiantes
 │   ├── calificar.html      # Formulario de calificaci&oacute;n individual
 │   ├── reporte.html        # Reporte de calificaciones
 │   └── admin/              # Panel de administraci&oacute;n
 │       ├── index.html
-│       ├── grupos.html
-│       ├── grupo_form.html
 │       ├── estudiantes.html
 │       ├── estudiante_form.html
 │       ├── estudiantes_cargar.html
@@ -58,9 +56,8 @@ desfile_evaluacion/
 - **M&uacute;ltiples jurados**: Cada jurado califica independientemente. El reporte muestra promedio y desglose por jurado.
 - **Reporte Excel**: Descarga en .xlsx con notas finales y detalle por jurado (para auditor&iacute;a).
 - **Autenticaci&oacute;n**: Login para jurados (sin contrase&ntilde;a opcional) y administradores.
-- **Panel de Administraci&oacute;n**: CRUD completo de grupos, estudiantes y jurados.
-- **Carga masiva**: Importar estudiantes desde Excel con creaci&oacute;n autom&aacute;tica de grupos.
-- **Horarios de sustentaci&oacute;n**: Cada grupo tiene un horario configurable.
+- **Panel de Administraci&oacute;n**: CRUD completo de estudiantes y jurados.
+- **Carga masiva**: Importar estudiantes desde Excel.
 - **API REST**: Endpoints para consultar estudiantes y calificaciones.
 
 ## Uso
@@ -74,14 +71,13 @@ desfile_evaluacion/
 
 ### Para administradores
 1. Ingresar con usuario: `admin`, contrase&ntilde;a: `admin123`
-2. Panel de Administraci&oacute;n para gestionar grupos, estudiantes y jurados
+2. Panel de Administraci&oacute;n para gestionar estudiantes y jurados
 3. Opci&oacute;n "Cargar Excel" para importar estudiantes masivamente
 
 ## Datos de prueba (seed)
 
 - **1 administrador**: admin / admin123
-- **2 grupos**: Grupo A (Lunes 8:00 AM), Grupo B (Lunes 10:00 AM)
-- **10 estudiantes** distribuidos en los grupos
+- **10 estudiantes**
 - **2 jurados**
 - **11 criterios** de evaluaci&oacute;n precargados
 

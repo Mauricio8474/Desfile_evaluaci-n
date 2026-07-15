@@ -30,7 +30,7 @@ La aplicaci&oacute;n tiene dos tipos de ingreso:
 ## 3. Ver listado de estudiantes
 
 1. En la p&aacute;gina principal o en la barra de navegaci&oacute;n, haz clic en **Estudiantes**.
-2. Ver&aacute;s los estudiantes organizados por grupo, con c&oacute;digo, nombre y horario de sustentaci&oacute;n.
+2. Ver&aacute;s el listado completo de estudiantes con c&oacute;digo y nombre.
 3. Si has iniciado sesi&oacute;n como jurado, ver&aacute;s un bot&oacute;n **Calificar** junto a cada estudiante.
 
 ## 4. Calificar a un estudiante
@@ -53,19 +53,13 @@ Cada estudiante recibe su propia calificaci&oacute;n individual.
 
 Disponible solo para administradores. Desde el panel puedes:
 
-### Gestionar grupos
-- Crear, editar y eliminar grupos
-- Asignar horario de sustentaci&oacute;n a cada grupo (ej. "Lunes 8:00 AM")
-
 ### Gestionar estudiantes
 - Crear, editar y eliminar estudiantes
-- Asignar estudiantes a grupos
 
 ### Cargar estudiantes desde Excel
 1. En la secci&oacute;n **Estudiantes** del panel, haz clic en **Cargar Excel**.
-2. Selecciona un archivo Excel con las columnas: **C&oacute;digo**, **Nombre**, **Grupo**.
-3. Si un grupo no existe, se crear&aacute; autom&aacute;ticamente.
-4. Si un c&oacute;digo ya existe, sus datos se actualizar&aacute;n.
+2. Selecciona un archivo Excel con las columnas: **C&oacute;digo**, **Nombre**.
+3. Si un c&oacute;digo ya existe, sus datos se actualizar&aacute;n.
 
 ### Gestionar jurados
 - Crear, editar y eliminar jurados
@@ -74,7 +68,7 @@ Disponible solo para administradores. Desde el panel puedes:
 ## 6. Ver reporte de calificaciones
 
 1. En la barra de navegaci&oacute;n, haz clic en **Reporte**.
-2. Se mostrar&aacute;n los resultados organizados por grupo, con las notas calculadas para cada estudiante:
+2. Se mostrar&aacute; una tabla con todos los estudiantes y sus notas calculadas:
    - **Nota Portafolio** (promedio ponderado de los criterios de Portafolio)
    - **Nota Sustentaci&oacute;n** (promedio ponderado de los criterios de Sustentaci&oacute;n)
    - **Nota Runway** (promedio ponderado de los criterios de Runway)
@@ -85,15 +79,21 @@ Disponible solo para administradores. Desde el panel puedes:
 
 1. En la p&aacute;gina de **Reporte**, haz clic en el bot&oacute;n **Descargar Excel**.
 2. Se descargar&aacute; un archivo `.xlsx` con dos hojas:
-   - **Hoja 1 — Notas finales**: Estudiante, c&oacute;digo, grupo, notas por componente y nota final.
+   - **Hoja 1 — Notas finales**: Estudiante, c&oacute;digo, notas por componente y nota final.
    - **Hoja 2 — Detalle por jurado**: Todas las calificaciones individuales por criterio y jurado (para auditor&iacute;a).
 
-## 8. Cerrar sesi&oacute;n
+## 8. Borrar todas las calificaciones (solo admin)
+
+1. En la p&aacute;gina de **Reporte**, el administrador ve un bot&oacute;n **Borrar todas**.
+2. Al hacer clic, aparece una confirmaci&oacute;n. Al aceptar, se eliminan todas las calificaciones de todos los jurados.
+3. Esta acci&oacute;n **no se puede deshacer**.
+
+## 9. Cerrar sesi&oacute;n
 
 1. Haz clic en tu nombre en la barra de navegaci&oacute;n superior.
 2. Selecciona **Cerrar sesi&oacute;n**.
 
-## 9. Consejos &uacute;tiles
+## 10. Consejos &uacute;tiles
 
 - Las notas deben estar entre **0.0 y 5.0**. El sistema valida este rango autom&aacute;ticamente.
 - Todos los campos deben estar diligenciados para poder guardar.

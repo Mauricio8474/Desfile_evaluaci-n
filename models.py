@@ -17,24 +17,11 @@ class Admin(UserMixin, db.Model):
     def __repr__(self):
         return f'<Admin {self.username}>'
 
-class Grupo(db.Model):
-    __tablename__ = 'grupos'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False, unique=True)
-    descripcion = db.Column(db.String(300), nullable=True)
-    horario = db.Column(db.String(50), nullable=True)
-    estudiantes = db.relationship('Estudiante', backref='grupo_obj', lazy=True)
-
-    def __repr__(self):
-        return f'<Grupo {self.nombre}>'
-
 class Estudiante(db.Model):
     __tablename__ = 'estudiantes'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(200), nullable=False)
     codigo = db.Column(db.String(50), unique=True, nullable=False)
-    grupo_id = db.Column(db.Integer, db.ForeignKey('grupos.id'), nullable=True)
-    grupo = db.Column(db.String(50), nullable=True)
     calificaciones = db.relationship('Calificacion', backref='estudiante', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
