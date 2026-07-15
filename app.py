@@ -419,6 +419,67 @@ def admin_estudiantes():
     sin_grupo = Estudiante.query.filter_by(grupo_id=None).order_by(Estudiante.nombre).all()
     return render_template('admin/estudiantes.html', estudiantes_por_grupo=estudiantes_por_grupo, sin_grupo=sin_grupo)
 
+@app.route('/admin/estudiantes/cargar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_estudiantes_cargar():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or archivo.filename == '':
+            flash('Selecciona un archivo Excel', 'error')
+            return redirect(url_for('admin_estudiantes_cargar'))
+        try:
+            wb = openpyxl.load_workbook(archivo)
+            ws = wb.active
+            filas = list(ws.iter_rows(min_row=2, values_only=True)) if ws.max_row > 1 else []
+            if not filas:
+                flash('El archivo no tiene datos (la primera fila se usa como encabezado)', 'error')
+                return redirect(url_for('admin_estudiantes_cargar'))
+            creados = 0
+            actualizados = 0
+            grupos_creados = 0
+            for row in filas:
+                if len(row) < 3:
+                    continue
+                codigo = str(row[0]).strip() if row[0] is not None else ''
+                nombre = str(row[1]).strip() if row[1] is not None else ''
+                grupo_nombre = str(row[2]).strip() if row[2] is not None else ''
+                if not codigo or not nombre:
+                    continue
+                grupo_obj = None
+                if grupo_nombre:
+                    grupo_obj = Grupo.query.filter_by(nombre=grupo_nombre).first()
+                    if not grupo_obj:
+                        grupo_obj = Grupo(nombre=grupo_nombre, descripcion=f'Importado de Excel')
+                        db.session.add(grupo_obj)
+                        db.session.flush()
+                        grupos_creados += 1
+                estudiante = Estudiante.query.filter_by(codigo=codigo).first()
+                if estudiante:
+                    estudiante.nombre = nombre
+                    estudiante.grupo_id = grupo_obj.id if grupo_obj else None
+                    estudiante.grupo = grupo_obj.nombre if grupo_obj else None
+                    actualizados += 1
+                else:
+                    estudiante = Estudiante(
+                        nombre=nombre, codigo=codigo,
+                        grupo_id=grupo_obj.id if grupo_obj else None,
+                        grupo=grupo_obj.nombre if grupo_obj else None
+                    )
+                    db.session.add(estudiante)
+                    creados += 1
+            db.session.commit()
+            msg = f'Importación completada: {creados} creados, {actualizados} actualizados'
+            if grupos_creados:
+                msg += f', {grupos_creados} grupos nuevos'
+            flash(msg, 'success')
+            return redirect(url_for('admin_estudiantes'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al procesar el archivo: {str(e)}', 'error')
+            return redirect(url_for('admin_estudiantes_cargar'))
+    return render_template('admin/estudiantes_cargar.html')
+
 @app.route('/admin/estudiantes/nuevo', methods=['GET', 'POST'])
 @login_required
 @admin_required

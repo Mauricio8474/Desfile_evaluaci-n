@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Cargar estudiantes desde Excel - Administraci&oacute;n{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-3"><i class="bi bi-upload me-2 text-usm"></i>Cargar estudiantes desde Excel</h4>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    El archivo debe tener las siguientes columnas en la primera fila (encabezados):
+                    <br><strong>C&oacute;digo</strong> | <strong>Nombre</strong> | <strong>Grupo</strong>
+                    <br><br>
+                    Si un grupo no existe, se crear&aacute; autom&aacute;ticamente.
+                    Si el c&oacute;digo ya existe, se actualizar&aacute;n sus datos.
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label">Seleccionar archivo Excel (.xlsx)</label>
+                        <input type="file" name="archivo" class="form-control form-control-lg" accept=".xlsx" required>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_estudiantes') }}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-usm"><i class="bi bi-upload me-1"></i> Cargar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body p-4">
+                <h5 class="mb-3"><i class="bi bi-file-earmark-excel me-1 text-usm"></i> Formato de ejemplo</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr><th>C&oacute;digo</th><th>Nombre</th><th>Grupo</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>2021001</td><td>Ana Rodr&iacute;guez</td><td>Grupo A</td></tr>
+                            <tr><td>2021002</td><td>Carlos P&eacute;rez</td><td>Grupo A</td></tr>
+                            <tr><td>2021003</td><td>Laura Garc&iacute;a</td><td>Grupo B</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
