@@ -8,7 +8,7 @@
 
 1. Abre tu navegador (Chrome, Firefox o Edge).
 2. Ve a la direcci&oacute;n donde est&aacute; alojada la aplicaci&oacute;n: `http://127.0.0.1:5000` (local) o la URL que te haya proporcionado el administrador.
-3. Ver&aacute;s la p&aacute;gina principal con tres opciones: **Estudiantes**, **Calificar por Grupo** y **Reporte**.
+3. Ver&aacute;s la p&aacute;gina principal con tres opciones: **Estudiantes**, **Calificar** y **Reporte**.
 
 ## 2. Inicio de sesi&oacute;n
 
@@ -31,24 +31,23 @@ La aplicaci&oacute;n tiene dos tipos de ingreso:
 
 1. En la p&aacute;gina principal o en la barra de navegaci&oacute;n, haz clic en **Estudiantes**.
 2. Ver&aacute;s los estudiantes organizados por grupo, con c&oacute;digo, nombre y horario de sustentaci&oacute;n.
-3. Si has iniciado sesi&oacute;n como jurado, ver&aacute;s un bot&oacute;n **Calificar grupo** junto a cada grupo.
+3. Si has iniciado sesi&oacute;n como jurado, ver&aacute;s un bot&oacute;n **Calificar** junto a cada estudiante.
 
-## 4. Calificar a un grupo
+## 4. Calificar a un estudiante
 
-**Importante:** La calificaci&oacute;n es por grupo completo. Las notas que ingreses se aplicar&aacute;n a **todos** los estudiantes del grupo.
+Cada estudiante recibe su propia calificaci&oacute;n individual.
 
 1. Aseg&uacute;rate de haber iniciado sesi&oacute;n como jurado.
-2. Desde la p&aacute;gina principal, en la tarjeta **Calificar por Grupo**, haz clic en **Seleccionar grupo** y elige un grupo.
-3. Tambi&eacute;n puedes ir a **Estudiantes** y hacer clic en **Calificar grupo** junto al grupo deseado.
-4. Se mostrar&aacute; un &uacute;nico formulario con los 11 criterios de evaluaci&oacute;n agrupados en tres componentes:
+2. Desde la p&aacute;gina principal, en la tarjeta **Calificar**, haz clic en **Seleccionar estudiante** y elige un estudiante.
+3. Tambi&eacute;n puedes ir a **Estudiantes** y hacer clic en **Calificar** junto al estudiante deseado.
+4. Se mostrar&aacute; un formulario con los 11 criterios de evaluaci&oacute;n agrupados en tres componentes:
    - **Portafolio de Dise&ntilde;o** (3 criterios, peso 30%)
    - **Sustentaci&oacute;n Oral** (4 criterios, peso 30%)
    - **Desarrollo de procesos y desempe&ntilde;o en el Runway** (4 criterios, peso 40%)
-5. En la parte superior se muestran los **integrantes del grupo** para que sepas a qui&eacute;nes se aplica la nota.
-6. Ingresa una nota num&eacute;rica de **0.0 a 5.0** para cada criterio (puedes usar un decimal, ej. 4.5).
-7. Observa la **barra de progreso** que muestra cu&aacute;ntos criterios has calificado.
-8. Al terminar, haz clic en **Guardar calificaci&oacute;n del grupo**.
-9. Recibir&aacute;s un mensaje de confirmaci&oacute;n. Puedes volver a calificar en cualquier momento; las notas anteriores se mostrar&aacute;n precargadas.
+5. Ingresa una nota num&eacute;rica de **0.0 a 5.0** para cada criterio (puedes usar un decimal, ej. 4.5).
+6. Observa la **barra de progreso** que muestra cu&aacute;ntos criterios has calificado.
+7. Al terminar, haz clic en **Guardar calificaci&oacute;n**.
+8. Recibir&aacute;s un mensaje de confirmaci&oacute;n. Puedes volver a calificar en cualquier momento; las notas anteriores se mostrar&aacute;n precargadas.
 
 ## 5. Panel de Administraci&oacute;n
 
@@ -99,7 +98,7 @@ Disponible solo para administradores. Desde el panel puedes:
 - Las notas deben estar entre **0.0 y 5.0**. El sistema valida este rango autom&aacute;ticamente.
 - Todos los campos deben estar diligenciados para poder guardar.
 - Puedes calificar parcialmente y volver despu&eacute;s: las notas guardadas se conservan.
-- Si cometes un error, simplemente vuelve a calificar al grupo y las notas anteriores se sobrescribir&aacute;n.
+- Si cometes un error, simplemente vuelve a calificar al estudiante y las notas anteriores se sobrescribir&aacute;n.
 - Cada jurado tiene sus propias calificaciones, visibles en el desglose del reporte.
 - El reporte en Excel puede abrirse con Microsoft Excel, LibreOffice Calc o Google Sheets.
 

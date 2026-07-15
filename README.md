@@ -33,7 +33,7 @@ desfile_evaluacion/
 │   ├── index.html          # P&aacute;gina de inicio
 │   ├── login.html          # Login (jurado y administrador)
 │   ├── estudiantes.html    # Listado de estudiantes por grupo
-│   ├── calificar_grupo.html# Formulario de calificaci&oacute;n por grupo
+│   ├── calificar.html      # Formulario de calificaci&oacute;n individual
 │   ├── reporte.html        # Reporte de calificaciones
 │   └── admin/              # Panel de administraci&oacute;n
 │       ├── index.html
@@ -53,7 +53,7 @@ desfile_evaluacion/
 
 ## Funcionalidades
 
-- **Calificaci&oacute;n por grupo**: Un solo formulario con 11 criterios (Portafolio 30%, Sustentaci&oacute;n 30%, Runway 40%). La nota se aplica a todos los estudiantes del grupo.
+- **Calificaci&oacute;n individual**: Formulario con 11 criterios (Portafolio 30%, Sustentaci&oacute;n 30%, Runway 40%) por cada estudiante.
 - **C&aacute;lculo autom&aacute;tico**: Nota ponderada por componente y nota final con redondeo a 2 decimales.
 - **M&uacute;ltiples jurados**: Cada jurado califica independientemente. El reporte muestra promedio y desglose por jurado.
 - **Reporte Excel**: Descarga en .xlsx con notas finales y detalle por jurado (para auditor&iacute;a).
@@ -68,8 +68,8 @@ desfile_evaluacion/
 ### Para jurados
 1. Abrir `http://127.0.0.1:5000`
 2. Ingresar como jurado (seleccionar nombre, contrase&ntilde;a opcional)
-3. En "Calificar por Grupo", seleccionar un grupo
-4. Ingresar notas (0.0 - 5.0) en los 11 criterios — se aplican a todos los estudiantes del grupo
+3. En "Calificar", seleccionar un estudiante
+4. Ingresar notas (0.0 - 5.0) en los 11 criterios
 5. Ver reporte y descargar Excel
 
 ### Para administradores

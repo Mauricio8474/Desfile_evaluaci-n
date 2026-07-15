@@ -174,19 +174,15 @@ def listar_estudiantes():
     grupos_con_estudiantes = get_grupos_con_estudiantes()
     return render_template('estudiantes.html', grupos_con_estudiantes=grupos_con_estudiantes)
 
-@app.route('/calificar/grupo/<int:grupo_id>', methods=['GET', 'POST'])
+@app.route('/calificar/<int:estudiante_id>', methods=['GET', 'POST'])
 @login_required
-def calificar_grupo(grupo_id):
+def calificar_estudiante(estudiante_id):
     if not isinstance(current_user, Jurado):
         flash('Solo los jurados pueden calificar.', 'error')
         return redirect(url_for('index'))
-    grupo = db.session.get(Grupo, grupo_id)
-    if not grupo:
-        flash('Grupo no encontrado', 'error')
-        return redirect(url_for('index'))
-    estudiantes = Estudiante.query.filter_by(grupo_id=grupo_id).order_by(Estudiante.nombre).all()
-    if not estudiantes:
-        flash(f'El grupo {grupo.nombre} no tiene estudiantes asignados', 'error')
+    estudiante = db.session.get(Estudiante, estudiante_id)
+    if not estudiante:
+        flash('Estudiante no encontrado', 'error')
         return redirect(url_for('index'))
     criterios = Criterio.query.order_by(Criterio.orden).all()
     if request.method == 'POST':
@@ -199,33 +195,31 @@ def calificar_grupo(grupo_id):
                     if nota < 0 or nota > 5:
                         todas_validas = False
                         continue
-                    for e in estudiantes:
-                        existing = Calificacion.query.filter_by(
-                            estudiante_id=e.id, criterio_id=c.id, jurado_id=current_user.id
-                        ).first()
-                        if existing:
-                            existing.nota = nota
-                            existing.fecha = datetime.now(timezone.utc)
-                        else:
-                            cal = Calificacion(
-                                estudiante_id=e.id, criterio_id=c.id,
-                                jurado_id=current_user.id, nota=nota
-                            )
-                            db.session.add(cal)
+                    existing = Calificacion.query.filter_by(
+                        estudiante_id=estudiante.id, criterio_id=c.id, jurado_id=current_user.id
+                    ).first()
+                    if existing:
+                        existing.nota = nota
+                        existing.fecha = datetime.now(timezone.utc)
+                    else:
+                        cal = Calificacion(
+                            estudiante_id=estudiante.id, criterio_id=c.id,
+                            jurado_id=current_user.id, nota=nota
+                        )
+                        db.session.add(cal)
                 except ValueError:
                     todas_validas = False
             else:
                 todas_validas = False
         if todas_validas:
             db.session.commit()
-            flash(f'Calificaciones guardadas para el grupo {grupo.nombre}', 'success')
+            flash(f'Calificaciones guardadas para {estudiante.nombre}', 'success')
             return redirect(url_for('index'))
         db.session.rollback()
         flash('Error. Verifica que todas las notas est\u00e9n entre 0.0 y 5.0.', 'error')
-    referencia = db.session.get(Estudiante, estudiantes[0].id)
     calificaciones_existentes = Calificacion.query.filter_by(
-        estudiante_id=estudiantes[0].id, jurado_id=current_user.id
-    ).all() if referencia else []
+        estudiante_id=estudiante.id, jurado_id=current_user.id
+    ).all()
     calif_dict = {c.criterio_id: c.nota for c in calificaciones_existentes}
     criterios_por_componente = {}
     for c in criterios:
@@ -234,7 +228,7 @@ def calificar_grupo(grupo_id):
     criterios_por_componente = dict(
         sorted(criterios_por_componente.items(), key=lambda x: componentes_orden.get(x[0], 99))
     )
-    return render_template('calificar_grupo.html', grupo=grupo, estudiantes=estudiantes,
+    return render_template('calificar.html', estudiante=estudiante,
                            criterios_por_componente=criterios_por_componente,
                            calif_dict=calif_dict, total_criterios=len(criterios))
 

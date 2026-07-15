@@ -36,8 +36,8 @@
                     <td><span class="badge bg-earth">{{ item.grupo.nombre }}</span></td>
                     {% if current_user.is_authenticated and current_user.__class__.__name__ == 'Jurado' %}
                     <td class="text-center">
-                        <a href="{{ url_for('calificar_grupo', grupo_id=item.grupo.id) }}" class="btn btn-sm btn-outline-usm">
-                            <i class="bi bi-star-fill"></i> Calificar grupo
+                        <a href="{{ url_for('calificar_estudiante', estudiante_id=e.id) }}" class="btn btn-sm btn-outline-usm">
+                            <i class="bi bi-star-fill"></i> Calificar
                         </a>
                     </td>
                     {% endif %}
