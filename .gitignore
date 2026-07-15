@@ -8,3 +8,5 @@ build/
 .env
 venv/
 .venv/
+test_*.xlsx
+*.xlsx
