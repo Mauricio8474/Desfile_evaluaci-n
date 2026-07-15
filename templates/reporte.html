@@ -3,9 +3,16 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0"><i class="bi bi-file-earmark-bar-graph-fill me-2 text-usm"></i>Reporte de Calificaciones</h3>
-    <a href="{{ url_for('exportar_excel') }}" class="btn btn-usm">
-        <i class="bi bi-file-earmark-excel me-1"></i> Descargar Excel
-    </a>
+    <div>
+        {% if current_user.is_authenticated and current_user.__class__.__name__ == 'Admin' %}
+        <button type="button" class="btn btn-outline-danger me-2" data-bs-toggle="modal" data-bs-target="#modalLimpiar">
+            <i class="bi bi-eraser-fill me-1"></i> Borrar todas
+        </button>
+        {% endif %}
+        <a href="{{ url_for('exportar_excel') }}" class="btn btn-usm">
+            <i class="bi bi-file-earmark-excel me-1"></i> Descargar Excel
+        </a>
+    </div>
 </div>
 
 {% if datos %}
@@ -69,6 +76,28 @@
         {% if current_user.is_authenticated and current_user.__class__.__name__ == 'Jurado' %}
         <a href="{{ url_for('index') }}" class="btn btn-usm">Ir a calificar</a>
         {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if current_user.is_authenticated and current_user.__class__.__name__ == 'Admin' %}
+<div class="modal fade" id="modalLimpiar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Borrar todas las calificaciones</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0"><strong>&iquest;Est&aacute;s seguro?</strong> Esta acci&oacute;n eliminar&aacute; <strong>TODAS</strong> las calificaciones de todos los jurados. No se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('admin_limpiar_calificaciones') }}">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-eraser-fill me-1"></i>S&iacute;, borrar todo</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}

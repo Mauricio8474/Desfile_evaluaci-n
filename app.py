@@ -113,7 +113,7 @@ def get_grupos_con_estudiantes():
     grupos = Grupo.query.order_by(Grupo.nombre).all()
     result = []
     for g in grupos:
-        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.nombre).all()
+        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
         result.append({'grupo': g, 'estudiantes': estudiantes})
     return result
 
@@ -238,7 +238,7 @@ def reporte():
     jurados = Jurado.query.order_by(Jurado.nombre).all()
     datos = []
     for g in grupos:
-        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.nombre).all()
+        estudiantes = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
         grupo_datos = []
         for e in estudiantes:
             resultado = calcular_promedio_jurados(e.id)
@@ -267,7 +267,7 @@ def exportar_excel():
         cell.fill = header_fill
         cell.alignment = header_alignment
         cell.border = thin_border
-    estudiantes = Estudiante.query.order_by(Estudiante.nombre).all()
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
     row = 2
     for e in estudiantes:
         resultado = calcular_promedio_jurados(e.id)
@@ -311,7 +311,7 @@ def exportar_excel():
 
 @app.route('/api/estudiantes')
 def api_estudiantes():
-    estudiantes = Estudiante.query.order_by(Estudiante.nombre).all()
+    estudiantes = Estudiante.query.order_by(Estudiante.id).all()
     return jsonify([{'id': e.id, 'nombre': e.nombre, 'codigo': e.codigo, 'grupo': e.grupo} for e in estudiantes])
 
 @app.route('/api/calificacion/<int:estudiante_id>/<int:jurado_id>')
@@ -411,8 +411,8 @@ def admin_estudiantes():
     grupos = Grupo.query.order_by(Grupo.nombre).all()
     estudiantes_por_grupo = {}
     for g in grupos:
-        estudiantes_por_grupo[g] = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.nombre).all()
-    sin_grupo = Estudiante.query.filter_by(grupo_id=None).order_by(Estudiante.nombre).all()
+        estudiantes_por_grupo[g] = Estudiante.query.filter_by(grupo_id=g.id).order_by(Estudiante.id).all()
+    sin_grupo = Estudiante.query.filter_by(grupo_id=None).order_by(Estudiante.id).all()
     return render_template('admin/estudiantes.html', estudiantes_por_grupo=estudiantes_por_grupo, sin_grupo=sin_grupo)
 
 @app.route('/admin/estudiantes/cargar', methods=['GET', 'POST'])
@@ -542,6 +542,21 @@ def admin_estudiante_eliminar(estudiante_id):
         db.session.commit()
         flash(f'Estudiante "{estudiante.nombre}" eliminado', 'success')
     return redirect(url_for('admin_estudiantes'))
+
+# ─── Limpiar calificaciones ───
+
+@app.route('/admin/limpiar_calificaciones', methods=['POST'])
+@login_required
+@admin_required
+def admin_limpiar_calificaciones():
+    try:
+        Calificacion.query.delete()
+        db.session.commit()
+        flash('Todas las calificaciones han sido eliminadas.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al limpiar calificaciones: {str(e)}', 'error')
+    return redirect(url_for('reporte'))
 
 # ─── CRUD Jurados ───
 
