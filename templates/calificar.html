@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Calificar - Evaluación Hilos de la Tierra{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Volver</a>
+    </div>
+    <div class="text-end">
+        <h4 class="mb-0">{{ estudiante.nombre }}</h4>
+        <small class="text-muted">Código: {{ estudiante.codigo }} | Grupo: {{ estudiante.grupo or '—' }}</small>
+    </div>
+</div>
+
+<div class="alert alert-info d-flex align-items-center">
+    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+    <div>
+        <strong>Jurado:</strong> {{ current_user.nombre }} — Ingresa las notas de 0.0 a 5.0 para cada criterio.
+    </div>
+</div>
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted small">Progreso de calificación</span>
+        <span class="text-muted small" id="progreso-texto">0/{{ total_criterios }}</span>
+    </div>
+    <div class="progress" style="height: 8px;">
+        <div id="barra-progreso" class="progress-bar bg-usm" role="progressbar" style="width: 0%"></div>
+    </div>
+</div>
+
+<form method="POST" id="form-calificacion">
+    {% set componentes_orden = {'Portafolio': 1, 'Sustentación': 2, 'Runway': 3} %}
+    {% for componente, criterios in criterios_por_componente.items() %}
+    {% set comp_peso = {'Portafolio': '30%', 'Sustentación': '30%', 'Runway': '40%'} %}
+    {% set comp_icono = {'Portafolio': 'bi-journal-text', 'Sustentación': 'bi-mic-fill', 'Runway': 'bi-person-walking'} %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center py-3">
+            <i class="bi {{ comp_icono.get(componente, 'bi-folder') }} fs-4 me-2 text-usm"></i>
+            <h5 class="mb-0 flex-grow-1">{{ componente }} <small class="text-muted">(Peso: {{ comp_peso.get(componente, '') }})</small></h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-borderless mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60%;">Criterio</th>
+                            <th style="width: 20%;" class="text-center">Ponderación</th>
+                            <th style="width: 20%;" class="text-center">Nota (0.0 - 5.0)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in criterios %}
+                        {% set nota_existente = calif_dict.get(c.id, '') %}
+                        <tr>
+                            <td>
+                                <span class="fw-medium">{{ c.nombre }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-earth">{{ c.porcentaje|int }}%</span>
+                            </td>
+                            <td class="text-center">
+                                <input type="number"
+                                       name="nota_{{ c.id }}"
+                                       class="form-control form-control-sm nota-input text-center mx-auto"
+                                       style="width: 120px;"
+                                       step="0.1"
+                                       min="0"
+                                       max="5"
+                                       value="{{ nota_existente }}"
+                                       placeholder="0.0 - 5.0"
+                                       required>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-usm btn-lg px-5">
+            <i class="bi bi-check-circle me-2"></i>Guardar Calificaciones
+        </button>
+    </div>
+</form>
+{% endblock %}

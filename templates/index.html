@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Inicio - Evaluación Hilos de la Tierra{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <div class="hero-section p-5 rounded-4">
+            <div class="earth-icon mb-3">
+                <i class="bi bi-globe-americas display-1"></i>
+            </div>
+            <h1 class="display-5 fw-bold">Evaluación "Hilos de la Tierra"</h1>
+            <p class="lead">Programa de Diseño de Moda — Institución Universitaria de Santa Marta</p>
+            <p class="mb-0">Sistema de calificación para el proyecto de aula del último corte académico.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="card-icon mb-3">
+                    <i class="bi bi-people-fill display-4"></i>
+                </div>
+                <h5 class="card-title">Estudiantes</h5>
+                <p class="card-text text-muted">Ver listado completo de estudiantes inscritos en el proyecto.</p>
+                <a href="{{ url_for('listar_estudiantes') }}" class="btn btn-usm w-100">
+                    <i class="bi bi-eye me-1"></i> Ver estudiantes
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="card-icon mb-3">
+                    <i class="bi bi-star-fill display-4"></i>
+                </div>
+                <h5 class="card-title">Calificar</h5>
+                <p class="card-text text-muted">Ingresa las calificaciones de cada estudiante según la rúbrica.</p>
+                {% if current_user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="btn btn-usm w-100 dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-pencil-square me-1"></i> Seleccionar estudiante
+                    </button>
+                    <ul class="dropdown-menu w-100">
+                        {% for e in estudiantes %}
+                        <li><a class="dropdown-item" href="{{ url_for('calificar', estudiante_id=e.id) }}">{{ e.nombre }} ({{ e.codigo }})</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-usm w-100">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar para calificar
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="card-icon mb-3">
+                    <i class="bi bi-file-earmark-bar-graph-fill display-4"></i>
+                </div>
+                <h5 class="card-title">Reporte</h5>
+                <p class="card-text text-muted">Visualiza y descarga el reporte de calificaciones en Excel.</p>
+                <a href="{{ url_for('reporte') }}" class="btn btn-usm w-100">
+                    <i class="bi bi-download me-1"></i> Ver reporte
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Resumen del proyecto</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="stat-number text-usm">{{ estudiantes|length }}</div>
+                        <div class="text-muted">Estudiantes registrados</div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="stat-number text-usm">{{ jurados|length }}</div>
+                        <div class="text-muted">Jurados</div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="stat-number text-usm">11</div>
+                        <div class="text-muted">Criterios de evaluación</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
