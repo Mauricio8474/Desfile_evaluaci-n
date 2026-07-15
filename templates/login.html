@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ingresar - Evaluación Hilos de la Tierra{% endblock %}
+{% block title %}Ingresar - Evaluaci&oacute;n Hilos de la Tierra{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
@@ -7,27 +7,61 @@
             <div class="card-body p-5">
                 <div class="text-center mb-4">
                     <i class="bi bi-person-badge display-4 text-usm"></i>
-                    <h4 class="mt-2">Acceso de Jurados</h4>
-                    <p class="text-muted">Selecciona tu perfil para ingresar al sistema</p>
+                    <h4 class="mt-2">Acceso al Sistema</h4>
                 </div>
-                <form method="POST" action="{{ url_for('login') }}">
-                    <div class="mb-3">
-                        <label class="form-label">Jurado</label>
-                        <select name="jurado_id" class="form-select form-select-lg" required>
-                            <option value="">— Selecciona un jurado —</option>
-                            {% for j in jurados %}
-                            <option value="{{ j.id }}">{{ j.nombre }}</option>
-                            {% endfor %}
-                        </select>
+
+                <ul class="nav nav-pills nav-justified mb-4" id="loginTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="jurado-tab" data-bs-toggle="pill" data-bs-target="#jurado-login" type="button" role="tab">
+                            <i class="bi bi-person-fill"></i> Jurado
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="admin-tab" data-bs-toggle="pill" data-bs-target="#admin-login" type="button" role="tab">
+                            <i class="bi bi-shield-lock-fill"></i> Administrador
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="jurado-login" role="tabpanel">
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <input type="hidden" name="tipo" value="jurado">
+                            <div class="mb-3">
+                                <label class="form-label">Jurado</label>
+                                <select name="jurado_id" class="form-select form-select-lg" required>
+                                    <option value="">&mdash; Selecciona un jurado &mdash;</option>
+                                    {% for j in jurados %}
+                                    <option value="{{ j.id }}">{{ j.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contrase&ntilde;a</label>
+                                <input type="password" name="password" class="form-control form-control-lg" placeholder="Dejar en blanco si no hay contrase&ntilde;a">
+                            </div>
+                            <button type="submit" class="btn btn-usm btn-lg w-100">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar como Jurado
+                            </button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-control form-control-lg" placeholder="Dejar en blanco si no hay contraseña">
+                    <div class="tab-pane fade" id="admin-login" role="tabpanel">
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <input type="hidden" name="tipo" value="admin">
+                            <div class="mb-3">
+                                <label class="form-label">Usuario</label>
+                                <input type="text" name="username" class="form-control form-control-lg" placeholder="admin" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contrase&ntilde;a</label>
+                                <input type="password" name="password" class="form-control form-control-lg" placeholder="Contrase&ntilde;a" required>
+                            </div>
+                            <button type="submit" class="btn btn-usm btn-lg w-100">
+                                <i class="bi bi-shield-lock-fill me-2"></i>Ingresar como Administrador
+                            </button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-usm btn-lg w-100">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
-                    </button>
-                </form>
+                </div>
             </div>
         </div>
     </div>

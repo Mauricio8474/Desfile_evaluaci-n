@@ -186,3 +186,38 @@ body {
 .table > :not(caption) > * > * {
     vertical-align: middle;
 }
+
+.nav-pills .nav-link {
+    color: var(--usm-blue);
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--usm-blue);
+    color: white;
+}
+
+.admin-card {
+    border-left: 4px solid var(--usm-blue);
+}
+
+.table-secondary {
+    background-color: #f0f4f8;
+}
+
+.table-secondary td {
+    font-weight: 600;
+    color: var(--usm-blue-dark);
+}
+
+.card-group-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 2px solid var(--usm-blue);
+}
+
+.grupo-section + .grupo-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed #dee2e6;
+}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Reporte - Evaluación Hilos de la Tierra{% endblock %}
+{% block title %}Reporte - Evaluaci&oacute;n Hilos de la Tierra{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0"><i class="bi bi-file-earmark-bar-graph-fill me-2 text-usm"></i>Reporte de Calificaciones</h3>
@@ -9,28 +9,32 @@
 </div>
 
 {% if datos %}
-<div class="card border-0 shadow-sm">
+{% for item in datos %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header d-flex align-items-center py-3">
+        <i class="bi bi-layer-group me-2 text-usm"></i>
+        <h5 class="mb-0 flex-grow-1">{{ item.grupo.nombre }}</h5>
+        <span class="badge bg-earth">{{ item.estudiantes|length }} estudiantes</span>
+    </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0" id="tabla-reporte">
+        <table class="table table-hover mb-0">
             <thead class="table-usm">
                 <tr>
                     <th>#</th>
                     <th>Estudiante</th>
-                    <th>Código</th>
-                    <th>Grupo</th>
+                    <th>C&oacute;digo</th>
                     <th class="text-center">Portafolio <small>(30%)</small></th>
-                    <th class="text-center">Sustentación <small>(30%)</small></th>
+                    <th class="text-center">Sustentaci&oacute;n <small>(30%)</small></th>
                     <th class="text-center">Runway <small>(40%)</small></th>
                     <th class="text-center">Nota Final</th>
                 </tr>
             </thead>
             <tbody>
-                {% for d in datos %}
+                {% for d in item.estudiantes %}
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td class="fw-medium">{{ d.estudiante.nombre }}</td>
                     <td><span class="badge bg-light text-dark">{{ d.estudiante.codigo }}</span></td>
-                    <td><span class="badge bg-earth">{{ d.estudiante.grupo or '—' }}</span></td>
                     <td class="text-center">{{ d.resultado.promedio_portafolio }}</td>
                     <td class="text-center">{{ d.resultado.promedio_sustentacion }}</td>
                     <td class="text-center">{{ d.resultado.promedio_runway }}</td>
@@ -40,7 +44,7 @@
                 </tr>
                 {% if jurados|length > 1 %}
                 <tr class="table-light">
-                    <td colspan="8">
+                    <td colspan="7">
                         <small class="text-muted">
                             <i class="bi bi-person-circle me-1"></i> Desglose por jurado:
                             {% for nf in d.resultado.notas_finales %}
@@ -55,13 +59,14 @@
         </table>
     </div>
 </div>
+{% endfor %}
 {% else %}
 <div class="card border-0 shadow-sm">
     <div class="card-body text-center py-5">
         <i class="bi bi-inbox display-3 text-muted"></i>
         <h5 class="mt-3">No hay calificaciones registradas</h5>
         <p class="text-muted">Los jurados deben calificar a los estudiantes para generar el reporte.</p>
-        {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated and current_user.__class__.__name__ == 'Jurado' %}
         <a href="{{ url_for('index') }}" class="btn btn-usm">Ir a calificar</a>
         {% endif %}
     </div>

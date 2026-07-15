@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if jurado else 'Nuevo' }} Jurado - Administraci&oacute;n{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-4">{{ 'Editar' if jurado else 'Nuevo' }} Jurado</h4>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" name="nombre" class="form-control form-control-lg" value="{{ jurado.nombre if jurado else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control form-control-lg" value="{{ jurado.email if jurado else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contrase&ntilde;a {% if jurado %}<small class="text-muted">(dejar en blanco para mantener)</small>{% endif %}</label>
+                        <input type="password" name="password" class="form-control form-control-lg" {{ 'required' if not jurado else '' }}>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_jurados') }}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-usm"><i class="bi bi-check-circle"></i> {{ 'Actualizar' if jurado else 'Crear' }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
