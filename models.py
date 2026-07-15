@@ -11,6 +11,9 @@ class Admin(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     nombre = db.Column(db.String(200), nullable=False)
 
+    def get_id(self):
+        return f'a_{self.id}'
+
     def __repr__(self):
         return f'<Admin {self.username}>'
 
@@ -43,6 +46,9 @@ class Jurado(UserMixin, db.Model):
     email = db.Column(db.String(200), nullable=True)
     password = db.Column(db.String(200), nullable=True)
     calificaciones = db.relationship('Calificacion', backref='jurado', lazy=True, cascade='all, delete-orphan')
+
+    def get_id(self):
+        return f'j_{self.id}'
 
     def __repr__(self):
         return f'<Jurado {self.nombre}>'
