@@ -16,8 +16,8 @@ def seed():
 
         if Grupo.query.count() == 0:
             grupos = [
-                Grupo(nombre='Grupo A', descripcion='Estudiantes del grupo A'),
-                Grupo(nombre='Grupo B', descripcion='Estudiantes del grupo B'),
+                Grupo(nombre='Grupo A', descripcion='Estudiantes del grupo A', horario='Lunes 8:00 AM'),
+                Grupo(nombre='Grupo B', descripcion='Estudiantes del grupo B', horario='Lunes 10:00 AM'),
             ]
             db.session.add_all(grupos)
             db.session.flush()

@@ -174,7 +174,7 @@ def listar_estudiantes():
     grupos_con_estudiantes = get_grupos_con_estudiantes()
     return render_template('estudiantes.html', grupos_con_estudiantes=grupos_con_estudiantes)
 
-@app.route('/calificar/grupo/<int:grupo_id>')
+@app.route('/calificar/grupo/<int:grupo_id>', methods=['GET', 'POST'])
 @login_required
 def calificar_grupo(grupo_id):
     if not isinstance(current_user, Jurado):
@@ -188,28 +188,6 @@ def calificar_grupo(grupo_id):
     if not estudiantes:
         flash(f'El grupo {grupo.nombre} no tiene estudiantes asignados', 'error')
         return redirect(url_for('index'))
-    calif_status = {}
-    for e in estudiantes:
-        count = Calificacion.query.filter_by(estudiante_id=e.id, jurado_id=current_user.id).count()
-        calif_status[e.id] = count
-    return render_template('calificar_grupo.html', grupo=grupo, estudiantes=estudiantes,
-                           calif_status=calif_status, total_criterios=Criterio.query.count())
-
-@app.route('/calificar/grupo/<int:grupo_id>/estudiante/<int:estudiante_id>', methods=['GET', 'POST'])
-@login_required
-def calificar_estudiante(grupo_id, estudiante_id):
-    if not isinstance(current_user, Jurado):
-        flash('Solo los jurados pueden calificar.', 'error')
-        return redirect(url_for('index'))
-    grupo = db.session.get(Grupo, grupo_id)
-    estudiante = db.session.get(Estudiante, estudiante_id)
-    if not grupo or not estudiante or estudiante.grupo_id != grupo_id:
-        flash('Estudiante o grupo no encontrado', 'error')
-        return redirect(url_for('index'))
-    estudiantes_grupo = Estudiante.query.filter_by(grupo_id=grupo_id).order_by(Estudiante.nombre).all()
-    idx_actual = next((i for i, e in enumerate(estudiantes_grupo) if e.id == estudiante_id), -1)
-    anterior = estudiantes_grupo[idx_actual - 1] if idx_actual > 0 else None
-    siguiente = estudiantes_grupo[idx_actual + 1] if idx_actual < len(estudiantes_grupo) - 1 else None
     criterios = Criterio.query.order_by(Criterio.orden).all()
     if request.method == 'POST':
         todas_validas = True
@@ -219,37 +197,35 @@ def calificar_estudiante(grupo_id, estudiante_id):
                 try:
                     nota = float(request.form[nota_key])
                     if nota < 0 or nota > 5:
-                        flash(f'La nota para "{c.nombre}" debe estar entre 0.0 y 5.0', 'error')
                         todas_validas = False
                         continue
-                    existing = Calificacion.query.filter_by(
-                        estudiante_id=estudiante_id, criterio_id=c.id, jurado_id=current_user.id
-                    ).first()
-                    if existing:
-                        existing.nota = nota
-                        existing.fecha = datetime.now(timezone.utc)
-                    else:
-                        cal = Calificacion(
-                            estudiante_id=estudiante_id, criterio_id=c.id,
-                            jurado_id=current_user.id, nota=nota
-                        )
-                        db.session.add(cal)
+                    for e in estudiantes:
+                        existing = Calificacion.query.filter_by(
+                            estudiante_id=e.id, criterio_id=c.id, jurado_id=current_user.id
+                        ).first()
+                        if existing:
+                            existing.nota = nota
+                            existing.fecha = datetime.now(timezone.utc)
+                        else:
+                            cal = Calificacion(
+                                estudiante_id=e.id, criterio_id=c.id,
+                                jurado_id=current_user.id, nota=nota
+                            )
+                            db.session.add(cal)
                 except ValueError:
-                    flash(f'Valor inv\u00e1lido para "{c.nombre}"', 'error')
                     todas_validas = False
             else:
-                flash(f'Debes calificar "{c.nombre}"', 'error')
                 todas_validas = False
         if todas_validas:
             db.session.commit()
-            flash(f'Calificaciones guardadas para {estudiante.nombre}', 'success')
-            if siguiente:
-                return redirect(url_for('calificar_estudiante', grupo_id=grupo_id, estudiante_id=siguiente.id))
-            return redirect(url_for('calificar_grupo', grupo_id=grupo_id))
+            flash(f'Calificaciones guardadas para el grupo {grupo.nombre}', 'success')
+            return redirect(url_for('index'))
         db.session.rollback()
+        flash('Error. Verifica que todas las notas est\u00e9n entre 0.0 y 5.0.', 'error')
+    referencia = db.session.get(Estudiante, estudiantes[0].id)
     calificaciones_existentes = Calificacion.query.filter_by(
-        estudiante_id=estudiante_id, jurado_id=current_user.id
-    ).all()
+        estudiante_id=estudiantes[0].id, jurado_id=current_user.id
+    ).all() if referencia else []
     calif_dict = {c.criterio_id: c.nota for c in calificaciones_existentes}
     criterios_por_componente = {}
     for c in criterios:
@@ -258,11 +234,9 @@ def calificar_estudiante(grupo_id, estudiante_id):
     criterios_por_componente = dict(
         sorted(criterios_por_componente.items(), key=lambda x: componentes_orden.get(x[0], 99))
     )
-    return render_template('calificar.html', grupo=grupo, estudiante=estudiante,
+    return render_template('calificar_grupo.html', grupo=grupo, estudiantes=estudiantes,
                            criterios_por_componente=criterios_por_componente,
-                           calif_dict=calif_dict, total_criterios=len(criterios),
-                           anterior=anterior, siguiente=siguiente, idx_actual=idx_actual,
-                           total_estudiantes=len(estudiantes_grupo))
+                           calif_dict=calif_dict, total_criterios=len(criterios))
 
 @app.route('/reporte')
 def reporte():
@@ -381,12 +355,13 @@ def admin_grupo_nuevo():
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
+        horario = request.form.get('horario', '').strip()
         if not nombre:
             flash('El nombre del grupo es obligatorio', 'error')
         elif Grupo.query.filter_by(nombre=nombre).first():
             flash('Ya existe un grupo con ese nombre', 'error')
         else:
-            grupo = Grupo(nombre=nombre, descripcion=descripcion)
+            grupo = Grupo(nombre=nombre, descripcion=descripcion, horario=horario if horario else None)
             db.session.add(grupo)
             db.session.commit()
             flash(f'Grupo "{nombre}" creado correctamente', 'success')
@@ -404,6 +379,7 @@ def admin_grupo_editar(grupo_id):
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
+        horario = request.form.get('horario', '').strip()
         if not nombre:
             flash('El nombre del grupo es obligatorio', 'error')
         else:
@@ -413,6 +389,7 @@ def admin_grupo_editar(grupo_id):
             else:
                 grupo.nombre = nombre
                 grupo.descripcion = descripcion
+                grupo.horario = horario if horario else None
                 db.session.commit()
                 flash(f'Grupo "{nombre}" actualizado', 'success')
                 return redirect(url_for('admin_grupos'))

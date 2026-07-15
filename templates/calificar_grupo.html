@@ -7,54 +7,89 @@
     </div>
     <div class="text-end">
         <h4 class="mb-0"><i class="bi bi-layer-group me-1"></i> {{ grupo.nombre }}</h4>
-        <small class="text-muted">{{ estudiantes|length }} estudiante(s) &middot; {{ total_criterios }} criterios</small>
+        <small class="text-muted">
+            {{ estudiantes|length }} estudiante(s)
+            {% if grupo.horario %} &middot; Horario: {{ grupo.horario }}{% endif %}
+        </small>
     </div>
 </div>
 
 <div class="alert alert-info d-flex align-items-center">
     <i class="bi bi-info-circle-fill me-2 fs-5"></i>
     <div>
-        <strong>Jurado:</strong> {{ current_user.nombre }} &mdash; Selecciona un estudiante para calificarlo individualmente.
+        <strong>Jurado:</strong> {{ current_user.nombre }} &mdash;
+        Esta calificaci&oacute;n se aplica a <strong>TODOS</strong> los estudiantes del grupo {{ grupo.nombre }}.
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead class="table-usm">
-                <tr>
-                    <th>#</th>
-                    <th>C&oacute;digo</th>
-                    <th>Nombre</th>
-                    <th class="text-center">Progreso</th>
-                    <th class="text-center">Calificar</th>
-                </tr>
-            </thead>
-            <tbody>
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people-fill me-1 text-usm"></i> Integrantes del grupo:</span>
+            <div>
                 {% for e in estudiantes %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td><span class="badge bg-light text-dark">{{ e.codigo }}</span></td>
-                    <td class="fw-medium">{{ e.nombre }}</td>
-                    <td class="text-center">
-                        {% set calif = calif_status.get(e.id, 0) %}
-                        {% if calif == 0 %}
-                        <span class="badge bg-secondary">Pendiente</span>
-                        {% elif calif < total_criterios %}
-                        <span class="badge bg-warning text-dark">{{ calif }}/{{ total_criterios }}</span>
-                        {% else %}
-                        <span class="badge bg-success">Completo</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-center">
-                        <a href="{{ url_for('calificar_estudiante', grupo_id=grupo.id, estudiante_id=e.id) }}" class="btn btn-sm btn-usm">
-                            <i class="bi bi-star-fill"></i> Calificar
-                        </a>
-                    </td>
-                </tr>
+                <span class="badge bg-light text-dark me-1">{{ e.nombre }}</span>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted small">Progreso</span>
+        <span class="text-muted small" id="progreso-texto">0/{{ total_criterios }}</span>
+    </div>
+    <div class="progress" style="height: 8px;">
+        <div id="barra-progreso" class="progress-bar bg-usm" role="progressbar" style="width: 0%"></div>
+    </div>
+</div>
+
+<form method="POST" id="form-calificacion">
+    {% set comp_peso = {'Portafolio': '30%', 'Sustentaci&oacute;n': '30%', 'Runway': '40%'} %}
+    {% set comp_icono = {'Portafolio': 'bi-journal-text', 'Sustentaci&oacute;n': 'bi-mic-fill', 'Runway': 'bi-person-walking'} %}
+    {% for componente, criterios in criterios_por_componente.items() %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center py-3">
+            <i class="bi {{ comp_icono.get(componente, 'bi-folder') }} fs-4 me-2 text-usm"></i>
+            <h5 class="mb-0 flex-grow-1">{{ componente }} <small class="text-muted">(Peso: {{ comp_peso.get(componente, '') }})</small></h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-borderless mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60%;">Criterio</th>
+                            <th style="width: 20%;" class="text-center">Ponderaci&oacute;n</th>
+                            <th style="width: 20%;" class="text-center">Nota (0.0 - 5.0)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in criterios %}
+                        {% set nota_existente = calif_dict.get(c.id, '') %}
+                        <tr>
+                            <td><span class="fw-medium">{{ c.nombre }}</span></td>
+                            <td class="text-center"><span class="badge bg-earth">{{ c.porcentaje|int }}%</span></td>
+                            <td class="text-center">
+                                <input type="number" name="nota_{{ c.id }}"
+                                       class="form-control form-control-sm nota-input text-center mx-auto"
+                                       style="width: 120px;" step="0.1" min="0" max="5"
+                                       value="{{ nota_existente }}" placeholder="0.0 - 5.0" required>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-usm btn-lg px-5">
+            <i class="bi bi-check-circle me-2"></i>Guardar calificaci&oacute;n del grupo
+        </button>
+    </div>
+</form>
 {% endblock %}

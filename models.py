@@ -22,6 +22,7 @@ class Grupo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, unique=True)
     descripcion = db.Column(db.String(300), nullable=True)
+    horario = db.Column(db.String(50), nullable=True)
     estudiantes = db.relationship('Estudiante', backref='grupo_obj', lazy=True)
 
     def __repr__(self):
